@@ -28,18 +28,22 @@ pipeline{
                 sh 'docker build -t bookmybuddy_backend-image ./api'
             }
         }
-          stage('Push Images to DockerHub') {
+stage('Push Images to DockerHub') {
             steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'DockerhubCred') {
 
-                docker.withRegistry('', 'DockerhubCred'){
-                    sh 'docker tag frontend-image nishu839/bookmybuddy_frontend-image:latest'
-                    sh 'docker push nishu839/bookmybuddy_frontend-image:latest'
-                    sh 'docker tag backend-image nishu839/bookmybuddy_backend-image:latest'
-                    sh 'docker push nishu839/bookmybuddy_backend-image:latest'
-                }          
+                        sh 'docker tag bookmybuddy_frontend-image nishu839/bookmybuddy_frontend-image:latest'
+                        sh 'docker push nishu839/bookmybuddy_frontend-image:latest'
+
+                        sh 'docker tag bookmybuddy_backend-image nishu839/bookmybuddy_backend-image:latest'
+                        sh 'docker push nishu839/bookmybuddy_backend-image:latest'
+                    }
+                }
             }
-        }
-        stage('Ansible Deployment') {
+        }       
+
+ stage('Ansible Deployment') {
             steps {
                 script { 
                     sh 'ansible-playbook -i inventory-k8 playbook-k8.yml'
