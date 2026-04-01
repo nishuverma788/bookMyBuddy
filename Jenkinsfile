@@ -4,8 +4,14 @@ pipeline{
         MONGO="mongodb+srv://chirag:chirag@cluster0.xxq7wug.mongodb.net/doctor_app?retryWrites=true&w=majority"
         JWT="a1cd158e2b34d47af6d0b446f59a326849f0dd8eb7ac51244f4ab4c1cb99552b9f856a8fb488f20fdbf0d489fc93b4d94fb71148a1bd24e2386a6c71e4d8a3cd"
     }
+
     stages{
-        stage('Clone Git'){
+        stage('Pre-Cleanup') {
+	    steps {
+        	sh 'docker system prune -f'
+    }
+}
+	stage('Clone Git'){
             steps{
                 git 'https://github.com/nishuverma788/bookMyBuddy.git'
             }
@@ -20,6 +26,7 @@ pipeline{
         }
         stage('Build Frontend Image') {
             steps {
+                
                 sh 'docker build -t bookmybuddy_frontend-image .'
             }
         }
