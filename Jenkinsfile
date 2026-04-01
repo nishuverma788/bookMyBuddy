@@ -6,6 +6,11 @@ pipeline{
     }
 
     stages{
+stage('Debug K8s Access') {
+    steps {
+        sh 'kubectl get nodes'
+    }
+}
         stage('Pre-Cleanup') {
 	    steps {
         	sh 'docker system prune -f'

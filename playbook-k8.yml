@@ -1,49 +1,69 @@
 ---
 - name: Deploying with Kubernetes
   hosts: all
+  become: true
+
+  vars:
+    venv_path: /opt/ansible-venv
+
   tasks:
 
-    - name: install pre-requisites
+    - name: Install python venv
+      package:
+        name: python3-venv
+        state: present
+
+    - name: Create virtualenv
+      command: python3 -m venv {{ venv_path }}
+      args:
+        creates: "{{ venv_path }}"
+
+    - name: Install k8s dependencies
       pip:
         name:
           - openshift
           - pyyaml
-          - kubernetes 
-        extra_args: --break-system-packages
+          - kubernetes
+        virtualenv: "{{ venv_path }}"
 
-    - name: Apply Secrets
+    - name: Deploy Secrets
       kubernetes.core.k8s:
+        kubeconfig: /var/lib/jenkins/.kube/config
         state: present
         definition: "{{ lookup('file', './k8/mern-backend-secret.yaml') | from_yaml }}"
 
-    - name: Create Frontend Deployment
+    - name: Deploy ConfigMap
       kubernetes.core.k8s:
+        kubeconfig: /var/lib/jenkins/.kube/config
         state: present
-        definition: "{{ lookup('file', './k8/frontend-deployment.yaml') | from_yaml }}" 
+        definition: "{{ lookup('file', './k8/frontend-configmap.yaml') | from_yaml }}"
 
-    - name: Create Frontend Service
+    - name: Deploy Backend
       kubernetes.core.k8s:
-        state: present
-        definition: "{{ lookup('file', './k8/frontend-service.yaml') | from_yaml }}" 
-
-
-    - name: Create Backend Deployment
-      kubernetes.core.k8s:
+        kubeconfig: /var/lib/jenkins/.kube/config
         state: present
         definition: "{{ lookup('file', './k8/backend-deployment.yaml') | from_yaml }}"
 
-    - name: Create Backend Service
+    - name: Deploy Backend Service
       kubernetes.core.k8s:
+        kubeconfig: /var/lib/jenkins/.kube/config
         state: present
         definition: "{{ lookup('file', './k8/backend-service.yaml') | from_yaml }}"
 
-
-    - name: Create Config Map
+    - name: Deploy Frontend
       kubernetes.core.k8s:
+        kubeconfig: /var/lib/jenkins/.kube/config
         state: present
-        definition: "{{ lookup('file', './k8/frontend-configmap.yaml') | from_yaml }}" 
+        definition: "{{ lookup('file', './k8/frontend-deployment.yaml') | from_yaml }}"
 
-    - name: Create Ingress
+    - name: Deploy Frontend Service
       kubernetes.core.k8s:
+        kubeconfig: /var/lib/jenkins/.kube/config
         state: present
-        definition: "{{ lookup('file', './k8/mern-ingress.yaml') | from_yaml }}" 
+        definition: "{{ lookup('file', './k8/frontend-service.yaml') | from_yaml }}"
+
+    - name: Deploy Ingress
+      kubernetes.core.k8s:
+        kubeconfig: /var/lib/jenkins/.kube/config
+        state: present
+        definition: "{{ lookup('file', './k8/mern-ingress.yaml') | from_yaml }}"
