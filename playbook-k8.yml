@@ -1,7 +1,6 @@
 ---
 - name: Deploying with Kubernetes
   hosts: all
-  become: true
 
   vars:
     venv_path: /opt/ansible-venv
