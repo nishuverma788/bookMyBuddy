@@ -3,7 +3,7 @@
   hosts: all
 
   vars:
-    venv_path: /opt/ansible-venv
+    venv_path: /var/lib/jenkins/ansible-venv
 
   tasks:
 
